@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
 import re
 import urllib2
@@ -6,7 +7,10 @@ from bs4 import BeautifulSoup
 from mechanize import Browser
 from tabulate import tabulate
 import fpdf
+import numpy as np
+import pandas as pd
 import string
+
 
 '''
    Currently supports:  #star-movies
@@ -37,7 +41,7 @@ def pdf_save(data_movies,headers):
     pdf.output('La-Z-Boy.pdf')
 
 def getBSoup(url):
-    print'''
+    print '''
 Processing...
 
     '''
@@ -135,19 +139,33 @@ def search_channel(channel2):
     for i in range(0, len(movie_name)):
         data_movies.append([str(movie_name[i]), str(time[i]), ratings[i]])
     print tabulate(data_movies, headers=headers)
+    create_db(data_movies,headers,channel2)
 
     #Saving to pdf
-    print("\nWant to save as pdf? Y/N")
+    print "\nWant to save as pdf? Y/N"
     choice = raw_input().lower()
     if choice == 'y':
         pdf_save(data_movies,headers)
-        print('\nSaved!')
+        print '\nSaved!'
     else:
-        print('\nBye!')
+        print '\nBye!'
+
+    #sending data to be saved in a database
+    return data_movies
+
+#creates a database of all the movies and entertainment channels
+def create_db(movies_list,headers,channel):
+    array = np.array(movies_list)
+    df = pd.DataFrame(array,columns=headers)
+    path = '/La-Z-Boy/Channel-DB/'
+    file = 'channel-DB/db_{}.csv'.format(channel)
+    #fullpath = os.path.join(path,file)
+    df.to_csv(file)
+
 
 def main():
 
-    print'''
+    print '''
                                                                         Welcome to La-Z-Boy
                                                                     For the love of good content
     '''
